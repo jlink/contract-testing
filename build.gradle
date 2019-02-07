@@ -1,0 +1,46 @@
+repositories {
+	mavenCentral()
+	maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
+}
+
+ext.junitJupiterVersion = '5.3.2'
+ext.jqwikVersion = '1.1.0-SNAPSHOT'
+
+apply plugin: 'java'
+
+compileTestJava {
+	sourceCompatibility = 1.8
+	targetCompatibility = 1.8
+	options.compilerArgs += '-parameters'
+}
+
+test {
+	useJUnitPlatform()
+
+	include '**/*Properties.class'
+	include '**/*Test.class'
+	include '**/*Tests.class'
+	//	include '**/*Examples.class'
+
+	// events = ["passed", "failed", "skipped"]
+	// testLogging.showStandardStreams = true
+}
+
+dependencies {
+
+  // jqwik is in compile classpath because it's extended here
+	compile "net.jqwik:jqwik:${jqwikVersion}"
+	runtime "net.jqwik:jqwik-engine:${jqwikVersion}"
+
+	testCompile("org.mockito:mockito-core:2.23.4")
+	testCompile("org.assertj:assertj-core:3.9.1")
+
+	testCompile("org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}")
+	testRuntime("org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}")
+
+}
+
+wrapper {
+	description = 'Generates gradlew[.bat] scripts'
+	gradleVersion = '5.1.1'
+}
