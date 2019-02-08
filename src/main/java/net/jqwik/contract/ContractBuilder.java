@@ -2,6 +2,7 @@ package net.jqwik.contract;
 
 import java.lang.reflect.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 class ContractBuilder<T> {
 
@@ -28,6 +29,7 @@ class ContractBuilder<T> {
 				checkPrecondition(method, args);
 				Object result = method.invoke(object, args);
 				checkPostcondition(method, args, result);
+				checkInvariants(object);
 				return result;
 			} catch (InvocationTargetException t) {
 				return throwAsUncheckedException(t.getCause());
@@ -35,20 +37,45 @@ class ContractBuilder<T> {
 		};
 	}
 
-	private void checkPostcondition(Method method, Object[] args, Object result) {
-		findEnsureMethod(method.getName(), method.getParameterTypes(), method.getReturnType())
-			.ifPresent(precondition -> {
+	private void checkInvariants(T object) {
+		findInvariantMethods()
+			.forEach(precondition -> {
 				try {
-					boolean check = (boolean) precondition.invoke(contract, append(args, result));
+					boolean check = (boolean) precondition.invoke(contract, object);
 					if (!check) {
-						throw new PostconditionViolation();
+						throw new InvariantViolation();
 					}
 				} catch (InvocationTargetException e) {
-					throw new PostconditionViolation(e.getCause().getMessage(), e.getCause());
+					throw new InvariantViolation(e.getCause().getMessage(), e.getCause());
 				} catch (IllegalAccessException e) {
-					throw new PostconditionViolation("Illegal Access", e);
+					throw new InvariantViolation("Illegal Access", e);
 				}
 			});
+
+	}
+
+	private List<Method> findInvariantMethods() {
+		return Arrays
+				.stream(contract.getClass().getDeclaredMethods())
+				.filter(method -> method.getAnnotation(Contract.Invariant.class) != null)
+				.filter(method -> method.getParameterTypes().length == 1)
+				.filter(method -> method.getParameterTypes()[0].equals(contractType))
+				.collect(Collectors.toList());
+	}
+
+	private void checkPostcondition(Method method, Object[] args, Object result) {
+		findEnsureMethod(method.getName(), method.getParameterTypes(), method.getReturnType()).ifPresent(precondition -> {
+			try {
+				boolean check = (boolean) precondition.invoke(contract, append(args, result));
+				if (!check) {
+					throw new PostconditionViolation();
+				}
+			} catch (InvocationTargetException e) {
+				throw new PostconditionViolation(e.getCause().getMessage(), e.getCause());
+			} catch (IllegalAccessException e) {
+				throw new PostconditionViolation("Illegal Access", e);
+			}
+		});
 
 	}
 

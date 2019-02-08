@@ -1,6 +1,6 @@
 package net.jqwik.contract;
 
-public class InvariantViolation extends ContractViolation {
+public class InvariantViolation extends PostconditionViolation {
 	public InvariantViolation() {
 	}
 

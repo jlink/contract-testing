@@ -21,7 +21,7 @@ class ContractBuilderTests {
 		Assertions.assertThat(contractedImpl.countLetters("123456789")).isEqualTo(9);
 
 		Assertions.assertThatThrownBy(() -> contractedImpl.countLetters(""))
-				  .isInstanceOf(ContractViolation.class);
+				  .isInstanceOf(PreconditionViolation.class);
 
 	}
 
@@ -38,7 +38,29 @@ class ContractBuilderTests {
 		MyInterface contractedImpl = new MyContract().wrap(impl, MyInterface.class);
 
 		Assertions.assertThatThrownBy(() -> contractedImpl.countLetters("abc"))
-				  .isInstanceOf(ContractViolation.class);
+				  .isInstanceOf(PostconditionViolation.class);
+
+	}
+
+	@Example
+	void invariantViolated() {
+
+		MyInterface impl = new MyInterface() {
+			@Override
+			public int countLetters(String word) {
+				return word.length();
+			}
+
+			@Override
+			public boolean anInvariant() {
+				return false;
+			}
+		};
+
+		MyInterface contractedImpl = new MyContract().wrap(impl, MyInterface.class);
+
+		Assertions.assertThatThrownBy(() -> contractedImpl.countLetters("abc"))
+				  .isInstanceOf(InvariantViolation.class);
 
 	}
 
@@ -46,6 +68,10 @@ class ContractBuilderTests {
 
 interface MyInterface {
 	int countLetters(String word);
+
+	default boolean anInvariant() {
+		return true;
+	}
 }
 
 class MyContract implements Contract<MyInterface> {
@@ -58,6 +84,11 @@ class MyContract implements Contract<MyInterface> {
 	@Ensure
 	boolean countLetters(String word, int result) {
 		return result > 0 && result < 10;
+	}
+
+	@Invariant
+	boolean invariant(MyInterface my) {
+		return my.anInvariant();
 	}
 
 }
