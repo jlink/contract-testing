@@ -24,10 +24,14 @@ class ContractBuilder<T> {
 
 	private InvocationHandler createHandler(T object) {
 		return (proxy, method, args) -> {
-			checkPrecondition(method, args);
-			Object result = method.invoke(object, args);
-			checkPostcondition(method, args, result);
-			return result;
+			try {
+				checkPrecondition(method, args);
+				Object result = method.invoke(object, args);
+				checkPostcondition(method, args, result);
+				return result;
+			} catch (InvocationTargetException t) {
+				return throwAsUncheckedException(t.getCause());
+			}
 		};
 	}
 
@@ -90,4 +94,23 @@ class ContractBuilder<T> {
 		}
 		return Optional.empty();
 	}
+
+	/**
+	 * Throw the supplied {@link Throwable}, <em>masked</em> as an
+	 * unchecked exception.
+	 *
+	 * @param t type returns a throwable to make usage simpler
+	 */
+	public static <T> T throwAsUncheckedException(Throwable t) {
+		throwAs(t);
+
+		// Will never get here
+		return null;
+	}
+
+	@SuppressWarnings("unchecked")
+	private static <T extends Throwable> void throwAs(Throwable t) throws T {
+		throw (T) t;
+	}
+
 }

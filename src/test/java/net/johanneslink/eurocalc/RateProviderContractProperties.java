@@ -66,13 +66,13 @@ class RateProviderContractProperties {
 
 		@Property
 		default void willThrowExceptionsForInvalidCurrencies(
-				@ForAll("currencies") String from, @ForAll("invalid") String to, @ForAll("rateProvider") @UseContract(RateProviderContract.class) E provider
+				@ForAll("currencies") String valid, @ForAll("invalid") String invalid, @ForAll("rateProvider") @UseContract(RateProviderContract.class) E provider
 		) {
 			// This should be done automatically:
 			RateProvider wrapped = new RateProviderContract().wrap(provider, RateProvider.class);
 
-			Assertions.assertThatThrownBy(() -> wrapped.rate(from, to)).isInstanceOf(IllegalArgumentException.class);
-			Assertions.assertThatThrownBy(() -> wrapped.rate(to, from)).isInstanceOf(IllegalArgumentException.class);
+			Assertions.assertThatThrownBy(() -> wrapped.rate(valid, invalid)).isInstanceOf(IllegalArgumentException.class);
+			Assertions.assertThatThrownBy(() -> wrapped.rate(invalid, valid)).isInstanceOf(IllegalArgumentException.class);
 		}
 
 		@Provide
