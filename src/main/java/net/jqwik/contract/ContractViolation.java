@@ -1,11 +1,11 @@
 package net.jqwik.contract;
 
-public class ContractViolation extends AssertionError {
+abstract class ContractViolation extends AssertionError {
 
-	public ContractViolation() {
+	ContractViolation() {
 	}
 
-	public ContractViolation(String message, Throwable cause) {
+	ContractViolation(String message, Throwable cause) {
 		super(message, cause);
 	}
 }

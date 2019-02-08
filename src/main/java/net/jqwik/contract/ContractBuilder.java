@@ -41,12 +41,12 @@ class ContractBuilder<T> {
 				try {
 					boolean check = (boolean) precondition.invoke(contract, append(args, result));
 					if (!check) {
-						throw new ContractViolation();
+						throw new PostconditionViolation();
 					}
-				} catch (IllegalAccessException e) {
-					throw new ContractViolation();
 				} catch (InvocationTargetException e) {
-					throw new ContractViolation();
+					throw new PostconditionViolation(e.getCause().getMessage(), e.getCause());
+				} catch (IllegalAccessException e) {
+					throw new PostconditionViolation("Illegal Access", e);
 				}
 			});
 
@@ -58,12 +58,12 @@ class ContractBuilder<T> {
 				try {
 					boolean check = (boolean) precondition.invoke(contract, args);
 					if (!check) {
-						throw new ContractViolation();
+						throw new PreconditionViolation();
 					}
-				} catch (IllegalAccessException e) {
-					throw new ContractViolation(e.getMessage(), e);
 				} catch (InvocationTargetException e) {
-					throw new ContractViolation(e.getCause().getMessage(), e.getCause());
+					throw new PreconditionViolation(e.getCause().getMessage(), e.getCause());
+				} catch (IllegalAccessException e) {
+					throw new PreconditionViolation(e.getMessage(), e);
 				}
 			});
 	}
