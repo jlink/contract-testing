@@ -28,7 +28,7 @@ class RateProviderContractProperties {
 		}
 
 		@Contract.Invariant
-		boolean anInvariant(RateProvider instance) {
+		public boolean anInvariant(RateProvider instance) {
 			return true;
 		}
 	}
