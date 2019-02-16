@@ -1,9 +1,9 @@
 package net.johanneslink.eurocalc;
 
-import net.jqwik.contract.Contract;
+import net.jqwik.contract.SupplierContract;
 
 public @interface UseContract {
 
-	Class<? extends Contract> value();
+	Class<? extends SupplierContract> value();
 
 }

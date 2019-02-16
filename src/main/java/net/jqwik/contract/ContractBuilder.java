@@ -6,14 +6,14 @@ import java.util.stream.*;
 
 class ContractBuilder<T> {
 
-	static <T> ContractBuilder<T> build(Contract<T> contract, Class<T> type) {
+	static <T> ContractBuilder<T> build(SupplierContract<T> contract, Class<T> type) {
 		return new ContractBuilder<>(contract, type);
 	}
 
-	private final Contract<T> contract;
+	private final SupplierContract<T> contract;
 	private final Class<T> contractType;
 
-	private ContractBuilder(Contract<T> contract, Class<T> contractType) {
+	private ContractBuilder(SupplierContract<T> contract, Class<T> contractType) {
 		this.contract = contract;
 		this.contractType = contractType;
 	}
@@ -25,15 +25,17 @@ class ContractBuilder<T> {
 
 	private InvocationHandler createHandler(T object) {
 		return (proxy, method, args) -> {
+			checkPrecondition(method, args);
+			SupplierContract.Result result;
 			try {
-				checkPrecondition(method, args);
-				Object result = method.invoke(object, args);
-				checkPostcondition(method, args, result);
-				checkInvariants(object);
-				return result;
-			} catch (InvocationTargetException t) {
-				return throwAsUncheckedException(t.getCause());
+				result = SupplierContract.Result.success(method.invoke(object, args));
+			} catch (Throwable throwable) {
+				result = SupplierContract.Result.failure(throwable);
 			}
+
+			checkPostcondition(method, args, result);
+			checkInvariants(object);
+			return result.get();
 		};
 	}
 
@@ -55,13 +57,13 @@ class ContractBuilder<T> {
 
 	private List<Method> findInvariantMethods() {
 		return Arrays.stream(contract.getClass().getDeclaredMethods())
-					 .filter(method -> method.getAnnotation(Contract.Invariant.class) != null)
+					 .filter(method -> method.getAnnotation(SupplierContract.Invariant.class) != null)
 					 .filter(method -> method.getParameterTypes().length == 1)
 					 .filter(method -> method.getParameterTypes()[0].equals(contractType))
 					 .collect(Collectors.toList());
 	}
 
-	private void checkPostcondition(Method method, Object[] args, Object result) {
+	private void checkPostcondition(Method method, Object[] args, SupplierContract.Result result) {
 		Optional<Method> ensureMethod = findEnsureMethod(method.getName(), method.getParameterTypes(), method.getReturnType());
 		if (ensureMethod.isPresent()) {
 			Method postcondition = ensureMethod.get();
@@ -97,8 +99,8 @@ class ContractBuilder<T> {
 
 	private Optional<Method> findEnsureMethod(String methodName, Class<?>[] parameterTypes, Class<?> returnType) {
 		try {
-			Method method = contract.getClass().getDeclaredMethod(methodName, append(parameterTypes, returnType));
-			if (method.getAnnotation(Contract.Ensure.class) != null) {
+			Method method = contract.getClass().getDeclaredMethod(methodName, append(parameterTypes, SupplierContract.Result.class));
+			if (method.getAnnotation(SupplierContract.Ensure.class) != null) {
 				return Optional.of(method);
 			}
 		} catch (NoSuchMethodException e) {
@@ -116,7 +118,7 @@ class ContractBuilder<T> {
 	private Optional<Method> findRequireMethod(String methodName, Class<?>[] parameterTypes) {
 		try {
 			Method method = contract.getClass().getDeclaredMethod(methodName, parameterTypes);
-			if (method.getAnnotation(Contract.Require.class) != null) {
+			if (method.getAnnotation(SupplierContract.Require.class) != null) {
 				return Optional.of(method);
 			}
 		} catch (NoSuchMethodException e) {

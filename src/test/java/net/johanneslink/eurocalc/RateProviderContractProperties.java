@@ -5,7 +5,7 @@ import java.util.*;
 import net.jqwik.api.*;
 import net.jqwik.api.arbitraries.DoubleArbitrary;
 import net.jqwik.api.constraints.DoubleRange;
-import net.jqwik.contract.Contract;
+import net.jqwik.contract.SupplierContract;
 import org.assertj.core.api.Assertions;
 import org.assertj.core.data.Offset;
 
@@ -13,8 +13,8 @@ import org.assertj.core.data.Offset;
 @Label("Contract: RateProvider")
 class RateProviderContractProperties {
 
-	public static class RateProviderContract implements Contract<RateProvider> {
-		@Contract.Require
+	public static class RateProviderContract implements SupplierContract<RateProvider> {
+		@SupplierContract.Require
 		public boolean rate(
 			@ConstrainedBy(CurrencyConstraint.class) String fromCurrency,
 			@ConstrainedBy(CurrencyConstraint.class) String toCurrency
@@ -22,12 +22,12 @@ class RateProviderContractProperties {
 			return !fromCurrency.equals(toCurrency);
 		}
 
-		@Contract.Ensure
-		public boolean rate(String fromCurrency, String toCurrency, double result) {
-			return result > 0.0;
+		@SupplierContract.Ensure
+		public boolean rate(String fromCurrency, String toCurrency, Result<Double> result) {
+			return result.get() > 0.0;
 		}
 
-		@Contract.Invariant
+		@SupplierContract.Invariant
 		public boolean anInvariant(RateProvider instance) {
 			return true;
 		}

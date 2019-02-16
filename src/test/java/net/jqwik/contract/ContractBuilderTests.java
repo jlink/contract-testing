@@ -74,7 +74,7 @@ interface MyInterface {
 	}
 }
 
-class MyContract implements Contract<MyInterface> {
+class MyContract implements SupplierContract<MyInterface> {
 
 	@Require
 	boolean countLetters(String word) {
