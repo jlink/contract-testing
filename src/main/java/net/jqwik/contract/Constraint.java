@@ -1,4 +1,4 @@
-package net.johanneslink.eurocalc;
+package net.jqwik.contract;
 
 public interface Constraint<T> {
 

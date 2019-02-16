@@ -51,6 +51,7 @@ class RateProviderContractProperties {
 				add("EUR");
 				add("USD");
 				add("CHF");
+				add("CAD");
 			}
 		};
 
@@ -85,8 +86,8 @@ class RateProviderContractProperties {
 			// This should be done automatically:
 			RateProvider wrapped = new RateProviderContract().wrap(provider, RateProvider.class);
 
-			Assertions.assertThatThrownBy(() -> wrapped.rate(valid, invalid)).isInstanceOf(IllegalArgumentException.class);
-			Assertions.assertThatThrownBy(() -> wrapped.rate(invalid, valid)).isInstanceOf(IllegalArgumentException.class);
+			Assertions.assertThatThrownBy(() -> wrapped.rate(valid, invalid)).isInstanceOf(PreconditionViolation.class);
+			Assertions.assertThatThrownBy(() -> wrapped.rate(invalid, valid)).isInstanceOf(PreconditionViolation.class);
 		}
 
 		@Provide

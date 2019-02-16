@@ -4,6 +4,8 @@ import java.lang.reflect.*;
 import java.util.*;
 import java.util.stream.*;
 
+import org.junit.platform.commons.support.*;
+
 class ContractBuilder<T> {
 
 	static <T> ContractBuilder<T> build(SupplierContract<T> contract, Class<T> type) {
@@ -85,6 +87,7 @@ class ContractBuilder<T> {
 		if (requireMethod.isPresent()) {
 			Method precondition = requireMethod.get();
 			try {
+				checkConstraints(precondition.getAnnotatedParameterTypes(), args);
 				boolean check = (boolean) precondition.invoke(contract, args);
 				if (!check) {
 					throw new PreconditionViolation();
@@ -94,6 +97,20 @@ class ContractBuilder<T> {
 			} catch (IllegalAccessException e) {
 				throw new ContractMethodNotPublic(precondition);
 			}
+		}
+	}
+
+	private void checkConstraints(AnnotatedType[] annotatedParameterTypes, Object[] args) {
+		for (int i = 0; i < annotatedParameterTypes.length; i++) {
+			AnnotatedType type = annotatedParameterTypes[i];
+			Object arg = args[i];
+			Optional<ConstrainedBy> annotation = AnnotationSupport.findAnnotation(type, ConstrainedBy.class);
+			annotation.ifPresent(constrainedBy -> {
+				Constraint constraint = ReflectionSupport.newInstance(constrainedBy.value());
+				if (!constraint.isValid(arg)) {
+					throw new PreconditionViolation();
+				}
+			});
 		}
 	}
 

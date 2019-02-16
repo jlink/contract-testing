@@ -1,4 +1,4 @@
-package net.johanneslink.eurocalc;
+package net.jqwik.contract;
 
 import java.lang.annotation.*;
 
@@ -6,5 +6,5 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ConstrainedBy {
 
-	Class<?> value();
+	Class<? extends Constraint> value();
 }
