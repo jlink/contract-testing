@@ -2,34 +2,44 @@ package net.johanneslink.eurocalc;
 
 import java.util.*;
 
+import org.assertj.core.api.*;
+import org.assertj.core.data.*;
+
 import net.jqwik.api.*;
-import net.jqwik.api.arbitraries.DoubleArbitrary;
-import net.jqwik.api.constraints.DoubleRange;
-import net.jqwik.contract.SupplierContract;
-import org.assertj.core.api.Assertions;
-import org.assertj.core.data.Offset;
+import net.jqwik.api.arbitraries.*;
+import net.jqwik.api.constraints.*;
+import net.jqwik.contract.*;
 
 @Group
 @Label("Contract: RateProvider")
 class RateProviderContractProperties {
 
 	public static class RateProviderContract implements SupplierContract<RateProvider> {
-		@SupplierContract.Require
+		@Require
 		public boolean rate(
-			@ConstrainedBy(CurrencyConstraint.class) String fromCurrency,
-			@ConstrainedBy(CurrencyConstraint.class) String toCurrency
+				@ConstrainedBy(CurrencyConstraint.class) String fromCurrency,
+				@ConstrainedBy(CurrencyConstraint.class) String toCurrency
 		) {
 			return !fromCurrency.equals(toCurrency);
 		}
 
-		@SupplierContract.Ensure
-		public boolean rate(String fromCurrency, String toCurrency, Result<Double> result) {
+		@Ensure
+		public boolean rate(String fromCurrency, String toCurrency, Result<@ConstrainedBy(RateConstraint.class) Double> result) {
 			return result.get() > 0.0;
 		}
 
-		@SupplierContract.Invariant
+		@Invariant
 		public boolean anInvariant(RateProvider instance) {
 			return true;
+		}
+	}
+
+	// Constraints should be checked during postcondition checking of a contract
+	static class RateConstraint implements Constraint<Double> {
+
+		@Override
+		public boolean isValid(Double value) {
+			return value > 0.0;
 		}
 	}
 
@@ -54,7 +64,9 @@ class RateProviderContractProperties {
 
 		@Property
 		default boolean willReturnRateAboveZeroForValidCurrencies(
-				@ForAll("currencies") String from, @ForAll("currencies") String to, @ForAll("rateProvider") @UseContract(RateProviderContract.class) E provider
+				@ForAll("currencies") String from,
+				@ForAll("currencies") String to,
+				@ForAll("rateProvider") @Contract(RateProviderContract.class) E provider
 		) {
 			Assume.that(!from.equals(to));
 
@@ -66,7 +78,9 @@ class RateProviderContractProperties {
 
 		@Property
 		default void willThrowExceptionsForInvalidCurrencies(
-				@ForAll("currencies") String valid, @ForAll("invalid") String invalid, @ForAll("rateProvider") @UseContract(RateProviderContract.class) E provider
+				@ForAll("currencies") String valid,
+				@ForAll("invalid") String invalid,
+				@ForAll("rateProvider") @Contract(RateProviderContract.class) E provider
 		) {
 			// This should be done automatically:
 			RateProvider wrapped = new RateProviderContract().wrap(provider, RateProvider.class);
@@ -102,9 +116,9 @@ class RateProviderContractProperties {
 
 		@Property
 		boolean willAlwaysConvertToPositiveEuroAmount(
-			@ForAll("nonEuroCurrencies") String from,
-			@ForAll @DoubleRange(min = 0.01, max = 1000000.0) double amount,
-			@ForAll("rateProvider") RateProvider provider
+				@ForAll("nonEuroCurrencies") String from,
+				@ForAll @DoubleRange(min = 0.01, max = 1000000.0) double amount,
+				@ForAll("rateProvider") RateProvider provider
 		) {
 
 			double euroAmount = new EuroConverter(provider).convert(amount, from);
