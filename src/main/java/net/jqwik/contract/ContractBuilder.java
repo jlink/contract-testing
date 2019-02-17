@@ -37,7 +37,10 @@ class ContractBuilder<T> {
 
 			checkPostcondition(method, args, result);
 			checkInvariants(object);
-			return result.get();
+			if (result.throwable().isPresent()) {
+				throw (Throwable) result.throwable().get();
+			}
+			return result.value().get();
 		};
 	}
 

@@ -22,8 +22,11 @@ class RateProviderContractProperties {
 		}
 
 		@Ensure
-		public boolean rate(String fromCurrency, String toCurrency, Result<@ConstrainedBy(RateConstraint.class) Double> result) {
-			return result.get() > 0.0;
+		public boolean rate(String fromCurrency, String toCurrency, Result<Double> result) {
+			if (result.value().isPresent()) {
+				return result.value().get() > 0.0;
+			}
+			return result.throwable().map(throwable -> throwable instanceof  UnknownCurrency).orElse(false);
 		}
 
 		@Invariant
@@ -39,17 +42,17 @@ class RateProviderContractProperties {
 				@ForAll("currencies") String from,
 				@ForAll("currencies") String to,
 				@ForAll("rateProvider") @Contract(RateProviderSupplierContract.class) E provider
-		) {
+		) throws UnknownCurrency {
 			Assume.that(!from.equals(to));
 
 			// This should be done automatically:
-			provider = (E) new RateProviderSupplierContract().wrap(provider, RateProvider.class);
+			RateProvider wrapped = new RateProviderSupplierContract().wrap(provider, RateProvider.class);
 
-			return provider.rate(from, to) > 0.0;
+			return wrapped.rate(from, to) > 0.0;
 		}
 
 		@Property
-		default void willThrowExceptionsForInvalidCurrencies(
+		default void invalidCurrenciesWillBeRejected(
 				@ForAll("currencies") String valid,
 				@ForAll("invalid") String invalid,
 				@ForAll("rateProvider") @Contract(RateProviderSupplierContract.class) E provider
@@ -68,16 +71,20 @@ class RateProviderContractProperties {
 
 		@Provide
 		default Arbitrary<String> invalid() {
-			return Arbitraries.of("A", "", "XXX", "CADCAD");
+			return Arbitraries.of("A", "", null, "CADCAD");
 		}
+
+		@Provide
+		abstract Arbitrary<E> rateProvider();
 
 	}
 
 	@Group
 	@Label("SimpleRateProvider")
 	class SimpleRateProviderTests implements RateProviderContract<SimpleRateProvider> {
+		@Override
 		@Provide
-		Arbitrary<SimpleRateProvider> rateProvider() {
+		public Arbitrary<SimpleRateProvider> rateProvider() {
 			return Arbitraries.constant(new SimpleRateProvider());
 		}
 	}
@@ -87,7 +94,7 @@ class RateProviderContractProperties {
 	class EuroConverterCollaborationTests {
 
 		@Property
-		boolean willAlwaysConvertToPositiveEuroAmount(
+		boolean knownCurrenciesAreAlwaysConvertedToPositiveEuroAmount(
 				@ForAll("nonEuroCurrencies") String from,
 				@ForAll @DoubleRange(min = 0.01, max = 1000000.0) double amount,
 				@ForAll("rateProvider") RateProvider provider
@@ -102,6 +109,12 @@ class RateProviderContractProperties {
 			RateProvider provider = (fromCurrency, toCurrency) -> 0.8;
 			double euroAmount = new EuroConverter(provider).convert(8.0, "USD");
 			Assertions.assertThat(euroAmount).isCloseTo(6.4, Offset.offset(0.01));
+		}
+
+		@Example
+		@Disabled("not implemented yet")
+		void canHandleUnknownCurrencyException() {
+			Assertions.fail("not implemented yet");
 		}
 
 		@Provide

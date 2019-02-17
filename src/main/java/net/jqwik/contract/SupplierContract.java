@@ -1,6 +1,7 @@
 package net.jqwik.contract;
 
 import java.lang.annotation.*;
+import java.util.*;
 
 public interface SupplierContract<T> {
 
@@ -46,9 +47,15 @@ public interface SupplierContract<T> {
 			this.throwable = throwable;
 		}
 
-		public T get() {
-			if (result != null) return result;
-			return ContractBuilder.throwAsUncheckedException(throwable);
+		public Optional<Throwable> throwable() {
+			return Optional.ofNullable(throwable);
+		}
+
+		public Optional<T> value() {
+			if (throwable != null) {
+				return Optional.empty();
+			}
+			return Optional.of(result);
 		}
 	}
 }

@@ -8,6 +8,10 @@ public class EuroConverter {
 	}
 
 	public double convert(double amount, String fromCurrency) {
-		return rateProvider.rate(fromCurrency, "EUR") * amount;
+		try {
+			return rateProvider.rate(fromCurrency, "EUR") * amount;
+		} catch (UnknownCurrency unknownCurrency) {
+			return 0.0;
+		}
 	}
 }

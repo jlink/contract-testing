@@ -2,13 +2,13 @@ package net.johanneslink.eurocalc;
 
 public class SimpleRateProvider implements RateProvider {
 	@Override
-	public double rate(String fromCurrency, String toCurrency) {
+	public double rate(String fromCurrency, String toCurrency) throws UnknownCurrency {
 		checkCurrencyValid(fromCurrency);
 		checkCurrencyValid(toCurrency);
 		return 1.0;
 	}
 
-	private void checkCurrencyValid(String currency) {
+	private void checkCurrencyValid(String currency) throws UnknownCurrency {
 		switch (currency) {
 			case "EUR":
 				break;
@@ -19,7 +19,7 @@ public class SimpleRateProvider implements RateProvider {
 			case "CAD":
 				break;
 			default: {
-				throw new IllegalArgumentException(currency + " is not a valid currency");
+				throw new UnknownCurrency(currency);
 			}
 		}
 	}
