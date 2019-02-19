@@ -83,7 +83,6 @@ class RateProviderContractProperties {
 	@Label("SimpleRateProvider")
 	class SimpleRateProviderTests implements RateProviderContract<SimpleRateProvider> {
 		@Override
-		@Provide
 		public Arbitrary<SimpleRateProvider> rateProvider() {
 			return Arbitraries.constant(new SimpleRateProvider());
 		}
