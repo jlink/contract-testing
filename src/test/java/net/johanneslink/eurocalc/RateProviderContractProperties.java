@@ -75,7 +75,11 @@ class RateProviderContractProperties {
 		}
 
 		@Provide
-		abstract Arbitrary<E> rateProvider();
+		default Arbitrary<E> rateProvider() {
+			return Arbitraries.create(this::createNewRateProvider);
+		}
+
+		abstract E createNewRateProvider();
 
 	}
 
@@ -83,8 +87,8 @@ class RateProviderContractProperties {
 	@Label("SimpleRateProvider")
 	class SimpleRateProviderTests implements RateProviderContract<SimpleRateProvider> {
 		@Override
-		public Arbitrary<SimpleRateProvider> rateProvider() {
-			return Arbitraries.constant(new SimpleRateProvider());
+		public SimpleRateProvider createNewRateProvider() {
+			return new SimpleRateProvider();
 		}
 	}
 
