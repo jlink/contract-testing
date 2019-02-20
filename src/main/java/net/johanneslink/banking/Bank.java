@@ -8,15 +8,17 @@ public interface Bank {
 
 	Optional<Account> accountById(@NonNull String id);
 
-	Account createAccount(@NonNull String id) throws AccountOperationFailed;
+	Account createAccount(@NonNull String customer) throws CannotCreateAccount;
 
 	List<Account> allAccounts();
 
-	void transfer(@NonNull Account source, @NonNull Account target, int amount) throws TransactionFailed;
+	void register(TransactionFinishedListener listener);
 
-	void disableAccount(@NonNull Account account) throws AccountOperationFailed;
+	void transfer(@NonNull String sourceId, @NonNull String targetId, int amount, @NonNull String transactionId);
 
-	void enableAccount(@NonNull Account account) throws AccountOperationFailed;
+	interface TransactionFinishedListener {
+		void success(String transactionId);
 
-	boolean isAccountEnabled(@NonNull Account account);
+		void failed(String transactionId, String reason);
+	}
 }

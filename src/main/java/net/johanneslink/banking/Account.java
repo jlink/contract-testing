@@ -6,9 +6,13 @@ public interface Account {
 
 	int balance();
 
-	void withdraw(int amount) throws TransactionFailed;
+	String id();
 
-	void deposit(int amount)  throws TransactionFailed;
+	String customer();
 
-	List<Transaction> history();
+	List<AccountEntry> history();
+
+	void debit(int amount);
+
+	void credit(int amount);
 }
