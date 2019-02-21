@@ -10,7 +10,7 @@ public class EuroConverter {
 	public double convert(double amount, String fromCurrency) {
 		try {
 			return rateProvider.rate(fromCurrency, "EUR") * amount;
-		} catch (UnknownCurrency unknownCurrency) {
+		} catch (RateNotAvailable unknownCurrency) {
 			return 0.0;
 		}
 	}

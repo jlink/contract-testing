@@ -1,4 +1,4 @@
-package net.johanneslink.eurocalc;
+package net.johanneslink.eurocalc.jqwik;
 
 import java.util.*;
 
