@@ -2,6 +2,8 @@ package net.johanneslink.eurocalc;
 
 import java.util.*;
 
+import org.jetbrains.annotations.*;
+
 public class DatabaseRateProvider implements RateProvider {
 
 	private static Map<String, Double> rates = new HashMap<>();
@@ -21,6 +23,10 @@ public class DatabaseRateProvider implements RateProvider {
 		rates.put("CADCHF", 0.9);
 	}
 
+	private static String[] supportedCurrencies = new String[]{"EUR", "USD", "CAD", "CHF"};
+
+	private static String[] obsoleteCurrencies = new String[]{"DEM"};
+
 	@Override
 	public double rate(String fromCurrency, String toCurrency) throws RateNotAvailable {
 		checkCurrencyValid(fromCurrency);
@@ -29,20 +35,22 @@ public class DatabaseRateProvider implements RateProvider {
 	}
 
 	private void checkCurrencyValid(String currency) throws RateNotAvailable {
-		switch (currency) {
-			case "EUR":
-				break;
-			case "USD":
-				break;
-			case "CHF":
-				break;
-			case "CAD":
-				break;
-			case "DEM":
-				throw new RateNotAvailable(currency);
-			default: {
-				throw new IllegalArgumentException(currency);
-			}
+		if (supportedCurrencies().contains(currency)) {
+			return;
 		}
+		if (obsoleteCurrencies().contains(currency)) {
+			throw new RateNotAvailable(currency);
+		}
+		throw new IllegalArgumentException(currency);
+	}
+
+	@NotNull
+	private List<String> obsoleteCurrencies() {
+		return Arrays.asList(obsoleteCurrencies);
+	}
+
+	@NotNull
+	private List<String> supportedCurrencies() {
+		return Arrays.asList(supportedCurrencies);
 	}
 }

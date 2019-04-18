@@ -1,4 +1,4 @@
-package net.johanneslink.eurocalc.pbt;
+package net.johanneslink.eurocalc.pbt_advanced;
 
 import net.johanneslink.eurocalc.*;
 import org.assertj.core.api.*;
