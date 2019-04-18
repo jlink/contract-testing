@@ -1,29 +1,28 @@
 package net.johanneslink.eurocalc.ebt;
 
 import net.johanneslink.eurocalc.*;
-import org.assertj.core.api.*;
-
-import net.jqwik.api.*;
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.*;
 
 interface RateProviderContractTests {
 
 	RateProvider createProvider();
 
-	@Example
+	@Test
 	default void throws_IllegalArgumentException_for_unknown_currency() {
 		RateProvider provider = createProvider();
 		Assertions.assertThatThrownBy(() -> provider.rate("XYZ", "USD"))
 				  .isInstanceOf(IllegalArgumentException.class);
 	}
 
-	@Example
+	@Test
 	default void throws_RateNotAvailable_for_obsolete_currency() {
 		RateProvider provider = createProvider();
 		Assertions.assertThatThrownBy(() -> provider.rate("DEM", "EUR"))
 				  .isInstanceOf(RateNotAvailable.class);
 	}
 
-	@Example
+	@Test
 	default void rates_are_always_between_allowed_min_and_max() throws RateNotAvailable {
 		assertRateWithinBounds("USD", "EUR");
 		assertRateWithinBounds("EUR", "USD");
@@ -37,7 +36,7 @@ interface RateProviderContractTests {
 		Assertions.assertThat(rate).isLessThanOrEqualTo(RateProvider.MAXIMUM_RATE);
 	}
 
-	@Example
+	@Test
 	default void inverse_rates_make_money() throws RateNotAvailable {
 		assertInverseRatesMakeMoney("USD", "EUR");
 		assertInverseRatesMakeMoney("CAD", "CHF");

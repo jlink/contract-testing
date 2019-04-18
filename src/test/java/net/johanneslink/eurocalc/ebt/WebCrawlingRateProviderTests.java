@@ -1,19 +1,17 @@
 package net.johanneslink.eurocalc.ebt;
 
 import net.johanneslink.eurocalc.*;
+import org.junit.jupiter.api.*;
 
-import net.jqwik.api.*;
-
-@Label("WebCrawlingRateProvider")
+@DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class WebCrawlingRateProviderTests {
 
-	@Group
+	@Nested
 	class Contract_Tests implements RateProviderContractTests {
 
 		@Override
 		public RateProvider createProvider() {
-			//TODO: Implement WebCrawlingRateProvider
-			return new DatabaseRateProvider();
+			return new WebCrawlingRateProvider();
 		}
 	}
 

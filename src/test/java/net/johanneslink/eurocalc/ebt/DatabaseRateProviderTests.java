@@ -1,13 +1,27 @@
 package net.johanneslink.eurocalc.ebt;
 
 import net.johanneslink.eurocalc.*;
+import org.junit.jupiter.api.*;
 
-import net.jqwik.api.*;
-
-@Label("DatabaseRateProvider")
+@DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class DatabaseRateProviderTests {
 
-	@Group
+	@Nested
+	class Functional_Tests {
+		@Test
+		void rates_data_is_loaded_on_startup() {
+		}
+
+		@Test
+		void rates_data_can_be_refreshed() {
+		}
+
+		@Test
+		void supported_rates_can_be_configured() {
+		}
+	}
+
+	@Nested
 	class Contract_Tests implements RateProviderContractTests {
 
 		@Override
