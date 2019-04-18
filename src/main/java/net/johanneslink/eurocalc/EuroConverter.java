@@ -8,6 +8,9 @@ public class EuroConverter {
 	}
 
 	public double convert(double amount, String fromCurrency) {
+		if (fromCurrency.length() != 3) {
+			throw new IllegalArgumentException(fromCurrency);
+		}
 		try {
 			return rateProvider.rate(fromCurrency, "EUR") * amount;
 		} catch (RateNotAvailable unknownCurrency) {

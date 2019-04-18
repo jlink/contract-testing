@@ -1,4 +1,4 @@
-package net.johanneslink.eurocalc.jqwik;
+package net.johanneslink.eurocalc.ebt;
 
 import net.johanneslink.eurocalc.*;
 import org.assertj.core.api.*;
@@ -26,6 +26,16 @@ class EuroConverterTests {
 		}
 
 		@Example
+		void illegal_currencies_are_not_handed_to_rate_provider() throws RateNotAvailable {
+			RateProvider provider = Mockito.mock(RateProvider.class);
+
+			Assertions.assertThatThrownBy(() -> new EuroConverter(provider).convert(8.0, "ab"))
+					  .isInstanceOf(IllegalArgumentException.class);
+
+			Mockito.verify(provider, Mockito.never()).rate(Mockito.anyString(), Mockito.anyString());
+		}
+
+		@Example
 		void can_handle_positive_exchange_rate() {
 			RateProvider provider = (fromCurrency, toCurrency) -> 0.8;
 			double euroAmount = new EuroConverter(provider).convert(8.0, "USD");
@@ -37,6 +47,13 @@ class EuroConverterTests {
 			RateProvider provider = (fromCurrency, toCurrency) -> { throw new RateNotAvailable("DEM"); };
 			double euroAmount = new EuroConverter(provider).convert(8.0, "DEM");
 			Assertions.assertThat(euroAmount).isEqualTo(0.0);
+		}
+
+		@Example
+		void can_handle_IllegalArgumentException() {
+			RateProvider provider = (fromCurrency, toCurrency) -> { throw new IllegalArgumentException("XYZ"); };
+			Assertions.assertThatThrownBy(() -> new EuroConverter(provider).convert(8.0, "XYZ"))
+					  .isInstanceOf(IllegalArgumentException.class);
 		}
 
 		@Example

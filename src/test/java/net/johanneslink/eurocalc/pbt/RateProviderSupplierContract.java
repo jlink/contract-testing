@@ -1,4 +1,4 @@
-package net.johanneslink.eurocalc.jqwik;
+package net.johanneslink.eurocalc.pbt;
 
 import net.johanneslink.eurocalc.*;
 

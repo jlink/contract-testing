@@ -1,6 +1,4 @@
-package net.johanneslink.eurocalc.jqwik;
-
-import java.util.*;
+package net.johanneslink.eurocalc.pbt;
 
 import net.jqwik.contract.*;
 
