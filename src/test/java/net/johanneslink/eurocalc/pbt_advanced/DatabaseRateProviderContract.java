@@ -6,9 +6,9 @@ import net.jqwik.api.*;
 
 @Group
 @Label("DatabaseRateProvider")
-class DatabaseRateProviderContract implements RateProviderContract<DatabaseRateProvider> {
+class DatabaseRateProviderContract implements RateProviderContractProperties<DatabaseRateProvider> {
 	@Override
-	public DatabaseRateProvider createNewRateProvider() {
+	public DatabaseRateProvider createProvider() {
 		return new DatabaseRateProvider();
 	}
 }

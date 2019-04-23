@@ -31,6 +31,8 @@ class ContractBuilder<T> {
 			SupplierContract.Result result;
 			try {
 				result = SupplierContract.Result.success(method.invoke(object, args));
+			} catch (InvocationTargetException ite) {
+				result = SupplierContract.Result.failure(ite.getTargetException());
 			} catch (Throwable throwable) {
 				result = SupplierContract.Result.failure(throwable);
 			}

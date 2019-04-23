@@ -16,9 +16,13 @@ public class RateProviderSupplierContract implements SupplierContract<RateProvid
 	@Ensure
 	public boolean rate(String fromCurrency, String toCurrency, Result<Double> result) {
 		if (result.value().isPresent()) {
-			return result.value().get() > 0.0;
+			Double rate = result.value().get();
+			return rate >= RateProvider.MINIMUM_RATE && rate <= RateProvider.MAXIMUM_RATE;
 		}
-		return result.throwable().map(throwable -> throwable instanceof RateNotAvailable).orElse(false);
+		return result.throwable()
+					 .map(throwable ->  throwable instanceof RateNotAvailable ||
+										throwable instanceof IllegalArgumentException)
+					 .orElse(false);
 	}
 
 	@Invariant

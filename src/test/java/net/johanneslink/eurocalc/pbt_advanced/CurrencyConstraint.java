@@ -9,6 +9,6 @@ class CurrencyConstraint implements Constraint<String> {
 		if (value == null) {
 			return false;
 		}
-		return value.trim().length() == 3;
+		return value.length() == 3;
 	}
 }
