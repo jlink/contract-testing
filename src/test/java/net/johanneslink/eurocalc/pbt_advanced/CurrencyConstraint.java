@@ -1,11 +1,14 @@
 package net.johanneslink.eurocalc.pbt_advanced;
 
+import org.checkerframework.checker.nullness.qual.*;
+
 import net.jqwik.contract.*;
 
 class CurrencyConstraint implements Constraint<String> {
 
 	@Override
-	public boolean isValid(String value) {
+	//TODO Use cherframework annotations
+	public boolean isValid(@NonNull String value) {
 		if (value == null) {
 			return false;
 		}
