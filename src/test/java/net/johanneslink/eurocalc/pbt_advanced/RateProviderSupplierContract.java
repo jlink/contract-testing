@@ -5,6 +5,11 @@ import net.johanneslink.eurocalc.*;
 import net.jqwik.contract.*;
 
 public class RateProviderSupplierContract implements SupplierContract<RateProvider> {
+	@Override
+	public Class<RateProvider> supplierType() {
+		return RateProvider.class;
+	}
+
 	@Require
 	public boolean rate(
 			@ConstrainedBy(CurrencyConstraint.class) String fromCurrency,
@@ -29,4 +34,5 @@ public class RateProviderSupplierContract implements SupplierContract<RateProvid
 	public boolean anInvariant(RateProvider instance) {
 		return true;
 	}
+
 }

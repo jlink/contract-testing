@@ -5,6 +5,8 @@ import java.util.*;
 
 public interface SupplierContract<T> {
 
+	Class<T> supplierType();
+
 	@Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
 	@Retention(RetentionPolicy.RUNTIME)
 	@Documented
@@ -26,8 +28,8 @@ public interface SupplierContract<T> {
 
 	}
 
-	default T wrap(T object, Class<T> type) {
-		return ContractBuilder.build(this, type).wrap(object);
+	default T wrap(T object) {
+		return ContractBuilder.build(this, supplierType()).wrap(object);
 	}
 
 	final class Result<T> {

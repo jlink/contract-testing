@@ -15,7 +15,7 @@ class ContractBuilderTests {
 			}
 		};
 
-		MyInterface contractedImpl = new MyContract().wrap(impl, MyInterface.class);
+		MyInterface contractedImpl = new MyContract().wrap(impl);
 
 		Assertions.assertThat(contractedImpl.countLetters("1")).isEqualTo(1);
 		Assertions.assertThat(contractedImpl.countLetters("123456789")).isEqualTo(9);
@@ -35,7 +35,7 @@ class ContractBuilderTests {
 			}
 		};
 
-		MyInterface contractedImpl = new MyContract().wrap(impl, MyInterface.class);
+		MyInterface contractedImpl = new MyContract().wrap(impl);
 
 		Assertions.assertThatThrownBy(() -> contractedImpl.countLetters("abc"))
 				  .isInstanceOf(PostconditionViolation.class);
@@ -57,7 +57,7 @@ class ContractBuilderTests {
 			}
 		};
 
-		MyInterface contractedImpl = new MyContract().wrap(impl, MyInterface.class);
+		MyInterface contractedImpl = new MyContract().wrap(impl);
 
 		Assertions.assertThatThrownBy(() -> contractedImpl.countLetters("abc"))
 				  .isInstanceOf(InvariantViolation.class);
@@ -76,14 +76,19 @@ interface MyInterface {
 
 class MyContract implements SupplierContract<MyInterface> {
 
+	@Override
+	public Class<MyInterface> supplierType() {
+		return MyInterface.class;
+	}
+
 	@Require
 	boolean countLetters(String word) {
 		return word.length() > 0 && word.length() < 10;
 	}
 
 	@Ensure
-	boolean countLetters(String word, int result) {
-		return result > 0 && result < 10;
+	boolean countLetters(String word, Result<Integer> result) {
+		return result.value().map(value -> value > 0 && value < 10).orElse(false);
 	}
 
 	@Invariant

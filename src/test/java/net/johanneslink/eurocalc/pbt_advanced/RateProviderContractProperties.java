@@ -11,8 +11,7 @@ interface RateProviderContractProperties<E extends RateProvider> {
 	default void rate_provider_contract_is_obeyed(
 			@ForAll("currencies") String currency1,
 			@ForAll("currencies") String currency2,
-			@ForAll("rateProvider") E provider
-//			@ForAll("rateProvider") @Contract(RateProviderSupplierContract.class) E provider
+			@ForAll("rateProvider") @Contract(RateProviderSupplierContract.class) E provider
 	) {
 		try {
 			provider.rate(currency1, currency2);
@@ -39,10 +38,9 @@ interface RateProviderContractProperties<E extends RateProvider> {
 
 	@Provide
 	default Arbitrary<RateProvider> rateProvider() {
-		return Arbitraries.create(this::createProvider)
-						  .map(p -> new RateProviderSupplierContract().wrap(p, RateProvider.class));
+		return Arbitraries.create(this::createProvider);
 	}
 
-	abstract E createProvider();
+	E createProvider();
 
 }
