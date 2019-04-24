@@ -25,7 +25,7 @@ interface RateProviderContractProperties<E extends RateProvider> {
 	}
 
 	default Arbitrary<String> supportedCurrencies() {
-		return Arbitraries.of("USD", "EUR", "CHF", "CAD", "DEM");
+		return Arbitraries.of("USD", "EUR", "CHF", "CAD", "DEM", "FRF");
 	}
 
 	default Arbitrary<String> obsoleteCurrencies() {
@@ -33,7 +33,7 @@ interface RateProviderContractProperties<E extends RateProvider> {
 	}
 
 	default Arbitrary<String> unknownCurrencies() {
-		return Arbitraries.of("ABC", "XYZ", "RRR");
+		return Arbitraries.strings().alpha().ofLength(3);
 	}
 
 	@Provide

@@ -24,12 +24,12 @@ interface RateProviderContractProperties<E extends RateProvider> {
 
 	@Provide
 	default Arbitrary<String> unknownCurrencies() {
-		return Arbitraries.of("ABC", "XYZ", "RRR");
+		return Arbitraries.strings().alpha().ofLength(3);
 	}
 
 	@Provide
 	default Arbitrary<String> knownCurrencies() {
-		return Arbitraries.of("USD", "EUR", "CHF", "CAD", "DEM");
+		return Arbitraries.of("USD", "EUR", "CHF", "CAD", "DEM", "FRF");
 	}
 
 	@Property
