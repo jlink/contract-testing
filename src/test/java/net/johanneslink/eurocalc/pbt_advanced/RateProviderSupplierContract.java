@@ -4,6 +4,8 @@ import net.johanneslink.eurocalc.*;
 
 import net.jqwik.contract.*;
 
+import static org.assertj.core.api.Assertions.*;
+
 public class RateProviderSupplierContract implements SupplierContract<RateProvider> {
 	@Override
 	public Class<RateProvider> supplierType() {
@@ -19,15 +21,16 @@ public class RateProviderSupplierContract implements SupplierContract<RateProvid
 	}
 
 	@Ensure
-	public boolean rate(String fromCurrency, String toCurrency, Result<Double> result) {
-		if (result.value().isPresent()) {
-			Double rate = result.value().get();
-			return rate >= RateProvider.MINIMUM_RATE && rate <= RateProvider.MAXIMUM_RATE;
-		}
-		return result.throwable()
-					 .map(throwable ->  throwable instanceof RateNotAvailable ||
-										throwable instanceof IllegalArgumentException)
-					 .orElse(false);
+	public void rate(String fromCurrency, String toCurrency, Result<Double> result) {
+		result.onValue(value -> {
+			assertThat(value).isGreaterThanOrEqualTo(RateProvider.MINIMUM_RATE);
+			assertThat(value).isLessThanOrEqualTo(RateProvider.MAXIMUM_RATE);
+		}).onThrowable(throwable -> {
+			assertThat(throwable).isInstanceOfAny(
+					RateNotAvailable.class,
+					IllegalArgumentException.class
+			);
+		});
 	}
 
 	@Invariant

@@ -26,6 +26,26 @@ class ContractBuilderTests {
 	}
 
 	@Example
+	void preconditionViolatedWithAsserts() {
+
+		MyInterface impl = new MyInterface() {
+			@Override
+			public int countLetters(String word) {
+				return word.length();
+			}
+		};
+
+		MyInterface contractedImpl = new MyContractWithAsserts().wrap(impl);
+
+		Assertions.assertThat(contractedImpl.countLetters("1")).isEqualTo(1);
+		Assertions.assertThat(contractedImpl.countLetters("123456789")).isEqualTo(9);
+
+		Assertions.assertThatThrownBy(() -> contractedImpl.countLetters(""))
+				  .isInstanceOf(PreconditionViolation.class);
+
+	}
+
+	@Example
 	void postconditionViolated() {
 
 		MyInterface impl = new MyInterface() {
@@ -36,6 +56,23 @@ class ContractBuilderTests {
 		};
 
 		MyInterface contractedImpl = new MyContract().wrap(impl);
+
+		Assertions.assertThatThrownBy(() -> contractedImpl.countLetters("abc"))
+				  .isInstanceOf(PostconditionViolation.class);
+
+	}
+
+	@Example
+	void postconditionViolatedWithAsserts() {
+
+		MyInterface impl = new MyInterface() {
+			@Override
+			public int countLetters(String word) {
+				return 0;
+			}
+		};
+
+		MyInterface contractedImpl = new MyContractWithAsserts().wrap(impl);
 
 		Assertions.assertThatThrownBy(() -> contractedImpl.countLetters("abc"))
 				  .isInstanceOf(PostconditionViolation.class);
@@ -58,6 +95,28 @@ class ContractBuilderTests {
 		};
 
 		MyInterface contractedImpl = new MyContract().wrap(impl);
+
+		Assertions.assertThatThrownBy(() -> contractedImpl.countLetters("abc"))
+				  .isInstanceOf(InvariantViolation.class);
+
+	}
+
+	@Example
+	void invariantViolatedWithAsserts() {
+
+		MyInterface impl = new MyInterface() {
+			@Override
+			public int countLetters(String word) {
+				return word.length();
+			}
+
+			@Override
+			public boolean anInvariant() {
+				return false;
+			}
+		};
+
+		MyInterface contractedImpl = new MyContractWithAsserts().wrap(impl);
 
 		Assertions.assertThatThrownBy(() -> contractedImpl.countLetters("abc"))
 				  .isInstanceOf(InvariantViolation.class);
@@ -94,6 +153,35 @@ class MyContract implements SupplierContract<MyInterface> {
 	@Invariant
 	boolean invariant(MyInterface my) {
 		return my.anInvariant();
+	}
+
+}
+
+class MyContractWithAsserts implements SupplierContract<MyInterface> {
+
+	@Override
+	public Class<MyInterface> supplierType() {
+		return MyInterface.class;
+	}
+
+	@Require
+	void countLetters(String word) {
+
+		Assertions.assertThat(word.length()).isGreaterThan(0);
+		Assertions.assertThat(word.length()).isLessThan(10);
+	}
+
+	@Ensure
+	void countLetters(String word, Result<Integer> result) {
+		result.onValue(value -> {
+			Assertions.assertThat(value).isGreaterThan(0);
+			Assertions.assertThat(value).isLessThan(10);
+		}).onThrowableFail();
+	}
+
+	@Invariant
+	void invariant(MyInterface my) {
+		Assertions.assertThat(my.anInvariant()).isTrue();
 	}
 
 }

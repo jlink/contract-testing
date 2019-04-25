@@ -49,8 +49,8 @@ class ContractBuilder<T> {
 	private void checkInvariants(T object) {
 		for (Method invariant : findInvariantMethods()) {
 			try {
-				boolean check = (boolean) invariant.invoke(contract, object);
-				if (!check) {
+				Object result = invariant.invoke(contract, object);
+				if (!toBoolean(result)) {
 					throw new InvariantViolation();
 				}
 			} catch (InvocationTargetException e) {
@@ -75,8 +75,8 @@ class ContractBuilder<T> {
 		if (ensureMethod.isPresent()) {
 			Method postcondition = ensureMethod.get();
 			try {
-				boolean check = (boolean) postcondition.invoke(contract, append(args, result));
-				if (!check) {
+				Object conditionResult = postcondition.invoke(contract, append(args, result));
+				if (!toBoolean(conditionResult)) {
 					throw new PostconditionViolation();
 				}
 			} catch (InvocationTargetException e) {
@@ -93,8 +93,8 @@ class ContractBuilder<T> {
 			Method precondition = requireMethod.get();
 			try {
 				checkConstraints(precondition.getAnnotatedParameterTypes(), args);
-				boolean check = (boolean) precondition.invoke(contract, args);
-				if (!check) {
+				Object result = precondition.invoke(contract, args);
+				if (!toBoolean(result)) {
 					throw new PreconditionViolation();
 				}
 			} catch (InvocationTargetException e) {
@@ -103,6 +103,19 @@ class ContractBuilder<T> {
 				throw new ContractMethodNotPublic(precondition);
 			}
 		}
+	}
+
+	private boolean toBoolean(Object result) {
+		if (result == null) {
+			return true;
+		}
+		if (boolean.class.isAssignableFrom(result.getClass())) {
+			return (boolean) result;
+		}
+		if (Boolean.class.isAssignableFrom(result.getClass())) {
+			return (boolean) result;
+		}
+		return true;
 	}
 
 	private void checkConstraints(AnnotatedType[] annotatedParameterTypes, Object[] args) {
