@@ -83,13 +83,15 @@ class EuroConverterProperties {
 		}
 
 		@Property
+		//@Report(Reporting.GENERATED)
 		void can_handle_any_exchange_rate(
 				@ForAll @DoubleRange(min = MINIMUM_RATE, max = MAXIMUM_RATE) double exchangeRate,
 				@ForAll @DoubleRange(min = 0.01, max = 1_000_000.0) double amount
 		) {
-			String collector = exchangeRate == MINIMUM_RATE ? "min"
+			String classifier = exchangeRate == MINIMUM_RATE ? "min"
 									   : exchangeRate == MAXIMUM_RATE ? "max" : "other";
-			Statistics.collect(collector);
+			Statistics.collect(classifier);
+
 			RateProvider provider = (fromCurrency, toCurrency) -> exchangeRate;
 			double euroAmount = new EuroConverter(provider).convert(amount, "USD");
 			Assertions.assertThat(euroAmount).isGreaterThan(0.0);

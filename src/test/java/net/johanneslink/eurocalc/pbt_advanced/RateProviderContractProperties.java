@@ -8,6 +8,7 @@ import net.jqwik.contract.*;
 interface RateProviderContractProperties<E extends RateProvider> {
 
 	@Property
+	@Report(Reporting.GENERATED)
 	default void rate_provider_contract_is_obeyed(
 			@ForAll("currencies") String currency1,
 			@ForAll("currencies") String currency2,
